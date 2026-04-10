@@ -1,0 +1,60 @@
+name: 🤖 BotListă — 24/7
+
+on:
+  # Repornire automată la fiecare 5 ore (GitHub Actions are limita de 6h per job)
+  schedule:
+    - cron: '0 */5 * * *'
+
+  # Pornire manuală din tab-ul Actions de pe GitHub
+  workflow_dispatch:
+
+  # Repornire automată când faci push pe main (deploy instant la modificări)
+  push:
+    branches: [main]
+
+# Dacă pornește o instanță nouă, o oprește pe cea veche
+concurrency:
+  group: telegram-bot
+  cancel-in-progress: true
+
+jobs:
+  run-bot:
+    name: Rulează botul
+    runs-on: ubuntu-latest
+    timeout-minutes: 355       # puțin sub limita de 360 min a GitHub Actions
+
+    steps:
+      - name: 📥 Descarcă codul
+        uses: actions/checkout@v4
+
+      # Restaurează data.json din rularea anterioară (persistența datelor)
+      - name: 💾 Restaurează datele salvate
+        uses: actions/cache/restore@v4
+        with:
+          path: data.json
+          key: bot-data-${{ github.run_id }}
+          restore-keys: |
+            bot-data-
+
+      - name: 🐍 Configurează Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: 📦 Instalează dependențele
+        run: pip install -r requirements.txt
+
+      # Rulează botul maxim 5h 40min, apoi se oprește curat
+      - name: 🚀 Pornește botul
+        run: timeout 20400 python bot.py || true
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+      # Salvează data.json după oprire (pentru repornire)
+      - name: 💾 Salvează datele pentru repornire
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data.json
+          key: bot-data-${{ github.run_id }}
