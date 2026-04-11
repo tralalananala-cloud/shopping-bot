@@ -1,0 +1,31 @@
+# Fly.io configuration
+# Înlocuiește "shopping-bot-app" cu numele ales la `fly launch`
+
+app            = "shopping-bot-app"
+primary_region = "ams"
+
+[build]
+  # Folosește Dockerfile-ul din rădăcina proiectului
+
+[env]
+  # Baza de date SQLite stocată pe volumul persistent /data
+  DB_PATH = "/data/shopping.db"
+
+# Portul expus public (FastAPI)
+[http_service]
+  internal_port        = 8000
+  force_https          = true
+  auto_stop_machines   = false   # botul trebuie să ruleze non-stop
+  auto_start_machines  = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Volum persistent pentru SQLite
+# Creează-l o singură dată cu: fly volumes create shopping_data --size 1 -r ams
+[[mounts]]
+  source      = "shopping_data"
+  destination = "/data"
