@@ -35,11 +35,11 @@ export default function GroupsListPage() {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp
-    if (tg) {
-      tg.BackButton.show()
-      tg.BackButton.onClick(() => setView({ type: 'home' }))
-      return () => { tg.BackButton.hide(); tg.BackButton.offClick(() => setView({ type: 'home' })) }
-    }
+    if (!tg) return
+    const goHome = () => setView({ type: 'home' })
+    tg.BackButton.show()
+    tg.BackButton.onClick(goHome)
+    return () => { tg.BackButton.hide(); tg.BackButton.offClick(goHome) }
   }, [setView])
 
   async function handleCreate() {

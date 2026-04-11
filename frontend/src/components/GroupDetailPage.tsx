@@ -65,11 +65,11 @@ export default function GroupDetailPage({ groupId }: Props) {
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp
-    if (tg) {
-      tg.BackButton.show()
-      tg.BackButton.onClick(() => setView({ type: 'groups-list' }))
-      return () => { tg.BackButton.hide(); tg.BackButton.offClick(() => setView({ type: 'groups-list' })) }
-    }
+    if (!tg) return
+    const goBack = () => setView({ type: 'groups-list' })
+    tg.BackButton.show()
+    tg.BackButton.onClick(goBack)
+    return () => { tg.BackButton.hide(); tg.BackButton.offClick(goBack) }
   }, [setView])
 
   const checkedCount = items.filter((i) => i.checked).length
