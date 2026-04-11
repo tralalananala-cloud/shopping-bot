@@ -26,8 +26,8 @@ app = FastAPI(
 # ---------------------------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # schimbă cu domeniul tău în producție
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,   # False permite allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
