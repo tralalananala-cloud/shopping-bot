@@ -1,6 +1,8 @@
 """Keyboard meniu principal și helper buton 🏠."""
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+
+APP_URL = "https://tralalananala-cloud.github.io/shopping-bot/"
 
 
 def back_btn() -> InlineKeyboardButton:
@@ -10,6 +12,7 @@ def back_btn() -> InlineKeyboardButton:
 
 def main_menu_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
+        [InlineKeyboardButton("📱 App — Deschide aplicația", web_app=WebAppInfo(url=APP_URL))],
         [InlineKeyboardButton("📝 Lista mea personală", callback_data="pl")],
         [InlineKeyboardButton("👥 Grupurile mele",      callback_data="mg")],
         [
