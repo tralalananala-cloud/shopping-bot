@@ -1,19 +1,26 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        tg: {
-          bg:       'var(--tg-bg)',
-          bg2:      'var(--tg-bg2)',
-          text:     'var(--tg-text)',
-          hint:     'var(--tg-hint)',
-          btn:      'var(--tg-btn)',
-          'btn-t':  'var(--tg-btn-text)',
-        },
+        primary: 'hsl(var(--primary))',
+        secondary: 'hsl(var(--secondary))',
+        accent: 'hsl(var(--accent))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        destructive: 'hsl(var(--destructive))',
+        muted: 'hsl(var(--muted))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
+        card: 'hsl(var(--card))',
+        border: 'hsl(var(--border))',
       },
-      borderRadius: { xl2: '16px' },
+      borderRadius: {
+        DEFAULT: 'var(--radius)',
+      },
+      fontFamily: {
+        sans: ['Space Grotesk', 'sans-serif'],
+      },
     },
   },
   plugins: [],

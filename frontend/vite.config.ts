@@ -7,7 +7,6 @@ export default defineConfig({
   // Base path: '/shopping-bot/' pentru GitHub Pages, '/' pentru dev/custom domain
   base: process.env.VITE_BASE || '/',
 
-  // În development: proxy cererile /api la API-ul local
   server: {
     port: 3000,
     proxy: {
