@@ -1,35 +1,29 @@
-"""CRUD pentru tabela users."""
+"""CRUD pentru tabela users (asyncpg / PostgreSQL)."""
 
-import aiosqlite
-from config import DB_PATH
+from database.connection import get_pool
 
 
 async def ensure_user(user_id: int, username: str = None, first_name: str = None) -> None:
-    """Înregistrează userul la prima interacțiune sau actualizează datele."""
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            """
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        await conn.execute("""
             INSERT INTO users (user_id, username, first_name)
-            VALUES (?, ?, ?)
-            ON CONFLICT(user_id) DO UPDATE SET
-                username   = COALESCE(excluded.username,   username),
-                first_name = COALESCE(excluded.first_name, first_name)
-            """,
-            (user_id, username, first_name),
-        )
-        await db.commit()
+            VALUES ($1, $2, $3)
+            ON CONFLICT (user_id) DO UPDATE SET
+                username   = COALESCE(EXCLUDED.username,   users.username),
+                first_name = COALESCE(EXCLUDED.first_name, users.first_name)
+        """, user_id, username, first_name)
 
 
 async def get_user(user_id: int):
-    """Returnează rândul userului sau None."""
-    async with aiosqlite.connect(DB_PATH) as db:
-        db.row_factory = aiosqlite.Row
-        cursor = await db.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-        return await cursor.fetchone()
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(
+            "SELECT * FROM users WHERE user_id = $1", user_id
+        )
 
 
 async def get_display_name(user_id: int) -> str:
-    """Returnează first_name sau username sau 'User #ID'."""
     user = await get_user(user_id)
     if user:
         return user["first_name"] or user["username"] or f"User #{user_id}"

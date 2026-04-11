@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: shopping-bot-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: BOT_TOKEN
+        sync: false        # setat manual în Render dashboard
+      - key: DATABASE_URL
+        sync: false        # setat manual în Render dashboard (Neon.tech URL)

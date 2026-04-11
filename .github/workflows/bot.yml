@@ -1,9 +1,40 @@
-# DEZACTIVAT — botul rulează acum pe Fly.io (deploy-fly.yml)
-# Dezcommentează și șterge liniile de mai jos dacă vrei să revii la GitHub Actions.
-#
-# name: 🤖 BotListă — 24/7 (fallback GitHub Actions)
-# on:
-#   schedule:
-#     - cron: '0 */5 * * *'
-#   workflow_dispatch:
-# ...
+name: 🤖 Bot Telegram — 24/7
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'   # repornire la fiecare 5 ore
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'frontend/**'
+      - '*.md'
+
+concurrency:
+  group: telegram-bot
+  cancel-in-progress: true
+
+jobs:
+  run-bot:
+    name: Rulează botul
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+
+    steps:
+      - name: 📥 Descarcă codul
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurează Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: 📦 Instalează dependențele
+        run: pip install -r requirements.txt
+
+      - name: 🚀 Pornește botul
+        run: timeout 20400 python bot.py || true
+        env:
+          BOT_TOKEN:    ${{ secrets.BOT_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
