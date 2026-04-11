@@ -4,8 +4,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 
+  // Base path: '/shopping-bot/' pentru GitHub Pages, '/' pentru dev/custom domain
+  base: process.env.VITE_BASE || '/',
+
   // În development: proxy cererile /api la API-ul local
-  // În producție: VITE_API_URL e setat la URL-ul Fly.io (ex: https://shopping-bot-app.fly.dev)
   server: {
     port: 3000,
     proxy: {

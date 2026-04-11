@@ -45,6 +45,7 @@ jobs:
         env:
           # URL-ul API-ului tău Fly.io (ex: https://shopping-bot-app.fly.dev)
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_BASE: /shopping-bot/
         run: npm run build
 
       - name: ⚙️ Configurează Pages
