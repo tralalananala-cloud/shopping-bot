@@ -218,6 +218,17 @@ async def delete_group_item(item_id: int, group_id: int) -> bool:
         return cur.rowcount > 0
 
 
+async def clear_group_checked(group_id: int) -> int:
+    """Șterge toate produsele bifate din lista grupului. Returnează numărul șters."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        cur = await db.execute(
+            "DELETE FROM group_lists WHERE group_id=? AND checked=1",
+            (group_id,),
+        )
+        await db.commit()
+        return cur.rowcount
+
+
 async def copy_personal_to_group(user_id: int, group_id: int, items: list) -> int:
     """Copiază itemii din lista personală în lista grupului. Returnează numărul copiat."""
     async with aiosqlite.connect(DB_PATH) as db:
