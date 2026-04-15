@@ -3,12 +3,12 @@
 from database.connection import get_pool
 
 
-async def add_item(user_id: int, item: str, quantity: str = "1") -> int:
+async def add_item(user_id: int, item: str, quantity: str = "1", priority: int = 2) -> int:
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
-            "INSERT INTO personal_lists (user_id, item, quantity) VALUES ($1, $2, $3) RETURNING id",
-            user_id, item.strip(), quantity,
+            "INSERT INTO personal_lists (user_id, item, quantity, priority) VALUES ($1, $2, $3, $4) RETURNING id",
+            user_id, item.strip(), quantity, priority,
         )
         return row["id"]
 
@@ -17,7 +17,7 @@ async def get_items(user_id: int) -> list:
     pool = await get_pool()
     async with pool.acquire() as conn:
         return await conn.fetch(
-            "SELECT * FROM personal_lists WHERE user_id=$1 ORDER BY checked ASC, id ASC",
+            "SELECT * FROM personal_lists WHERE user_id=$1 ORDER BY checked ASC, priority DESC, id DESC",
             user_id,
         )
 

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { House, ShoppingCart, Users, HelpCircle, type LucideProps } from 'lucide-react'
+import { LayoutList, ShoppingCart, Users, CheckCircle2, HelpCircle, type LucideProps } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import type { View } from '../store/useAppStore'
 import { clsx } from 'clsx'
@@ -7,27 +7,25 @@ import type { ForwardRefExoticComponent, RefAttributes } from 'react'
 
 type LucideIcon = ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
 
-const tabs: Array<{
-  label: string
-  icon: LucideIcon
-  view: View
-}> = [
-  { label: 'Home', icon: House, view: { type: 'home' } },
-  { label: 'Lista', icon: ShoppingCart, view: { type: 'personal-list' } },
-  { label: 'Grupuri', icon: Users, view: { type: 'groups-list' } },
-  { label: 'Ajutor', icon: HelpCircle, view: { type: 'help' } },
+const tabs: Array<{ label: string; icon: LucideIcon; view: View }> = [
+  { label: 'Feed',       icon: LayoutList,    view: { type: 'feed' } },
+  { label: 'Lista',      icon: ShoppingCart,  view: { type: 'personal-list' } },
+  { label: 'Grupuri',    icon: Users,         view: { type: 'groups-list' } },
+  { label: 'Completate', icon: CheckCircle2,  view: { type: 'completed' } },
+  { label: 'Ajutor',     icon: HelpCircle,    view: { type: 'help' } },
 ]
 
 export default function BottomNav() {
-  const view = useAppStore((s) => s.view)
+  const view    = useAppStore((s) => s.view)
   const setView = useAppStore((s) => s.setView)
 
-  const activeType = view.type === 'group-detail' ? 'groups-list' : view.type
+  const activeType =
+    view.type === 'group-detail' ? 'groups-list' : view.type
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-6">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-3 pb-5">
       <div className="mx-auto w-full max-w-[440px]">
-        <nav className="glass-card relative flex items-center justify-around rounded-3xl px-2 py-3">
+        <nav className="glass-card relative flex items-center justify-around rounded-3xl px-1 py-2.5">
           {tabs.map((tab) => {
             const isActive = tab.view.type === activeType
             const Icon: LucideIcon = tab.icon
@@ -35,7 +33,7 @@ export default function BottomNav() {
               <button
                 key={tab.view.type}
                 onClick={() => setView(tab.view)}
-                className="relative flex flex-col items-center gap-1 px-4 py-1"
+                className="relative flex flex-col items-center gap-0.5 px-3 py-1"
               >
                 {isActive && (
                   <motion.div
@@ -49,7 +47,7 @@ export default function BottomNav() {
                   />
                 )}
                 <Icon
-                  size={20}
+                  size={19}
                   className={clsx(
                     'relative z-10 transition-colors duration-200',
                     isActive ? 'text-primary' : 'text-muted-foreground',
@@ -57,7 +55,7 @@ export default function BottomNav() {
                 />
                 <span
                   className={clsx(
-                    'relative z-10 text-xs font-medium transition-colors duration-200',
+                    'relative z-10 text-[10px] font-medium transition-colors duration-200',
                     isActive ? 'text-primary' : 'text-muted-foreground',
                   )}
                 >

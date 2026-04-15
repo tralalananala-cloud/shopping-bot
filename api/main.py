@@ -12,7 +12,7 @@ Documentație interactivă:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import groups, personal, users
+from api.routers import feed, groups, personal, users
 from database.db import init_db
 
 app = FastAPI(
@@ -49,6 +49,7 @@ async def startup():
 app.include_router(users.router,    prefix="/api/users",    tags=["Utilizatori"])
 app.include_router(personal.router, prefix="/api/personal", tags=["Lista personală"])
 app.include_router(groups.router,   prefix="/api/groups",   tags=["Grupuri"])
+app.include_router(feed.router,     prefix="/api/feed",     tags=["Feed"])
 
 
 # ---------------------------------------------------------------------------

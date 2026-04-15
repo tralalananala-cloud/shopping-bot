@@ -126,6 +126,16 @@ async def get_members(group_id: int) -> list:
         """, group_id)
 
 
+async def get_member_ids(group_id: int) -> list[int]:
+    """Returnează lista de user_id ale tuturor membrilor grupului."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT user_id FROM group_members WHERE group_id=$1", group_id
+        )
+        return [r["user_id"] for r in rows]
+
+
 async def member_count(group_id: int) -> int:
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -139,12 +149,12 @@ async def member_count(group_id: int) -> int:
 # Lista grupului
 # ---------------------------------------------------------------------------
 
-async def add_group_item(group_id: int, item: str, quantity: str, added_by: int) -> int:
+async def add_group_item(group_id: int, item: str, quantity: str, added_by: int, priority: int = 2) -> int:
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow(
-            "INSERT INTO group_lists (group_id, item, quantity, added_by) VALUES ($1,$2,$3,$4) RETURNING id",
-            group_id, item.strip(), quantity, added_by,
+            "INSERT INTO group_lists (group_id, item, quantity, added_by, priority) VALUES ($1,$2,$3,$4,$5) RETURNING id",
+            group_id, item.strip(), quantity, added_by, priority,
         )
         return row["id"]
 
@@ -157,7 +167,7 @@ async def get_group_items(group_id: int) -> list:
             FROM group_lists gl
             JOIN users u ON u.user_id = gl.added_by
             WHERE gl.group_id = $1
-            ORDER BY gl.checked ASC, gl.id ASC
+            ORDER BY gl.checked ASC, gl.priority DESC, gl.id DESC
         """, group_id)
 
 
@@ -218,3 +228,36 @@ async def copy_personal_to_group(user_id: int, group_id: int, items: list) -> in
             )
             count += 1
         return count
+
+
+async def get_feed(user_id: int) -> list:
+    """Returnează toate produsele (personal + grupuri) pentru feed."""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        return await conn.fetch("""
+            SELECT
+                'personal'::TEXT AS source,
+                NULL::BIGINT      AS group_id,
+                NULL::TEXT        AS group_name,
+                COALESCE(u.first_name, u.username, 'Tu') AS added_by_name,
+                pl.id, pl.item, pl.quantity, pl.priority, pl.checked, pl.created_at
+            FROM personal_lists pl
+            JOIN users u ON u.user_id = pl.user_id
+            WHERE pl.user_id = $1
+
+            UNION ALL
+
+            SELECT
+                'group'::TEXT AS source,
+                g.id          AS group_id,
+                g.name        AS group_name,
+                COALESCE(u.first_name, u.username, 'Utilizator') AS added_by_name,
+                gl.id, gl.item, gl.quantity, gl.priority, gl.checked, gl.created_at
+            FROM group_lists gl
+            JOIN groups g ON g.id = gl.group_id
+            JOIN group_members gm ON gm.group_id = g.id AND gm.user_id = $1
+            JOIN users u ON u.user_id = gl.added_by
+
+            ORDER BY checked ASC, priority DESC, created_at DESC
+            LIMIT 200
+        """, user_id)

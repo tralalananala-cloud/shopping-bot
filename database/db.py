@@ -57,4 +57,13 @@ async def init_db() -> None:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        # Migrări: adaugă coloanele noi dacă nu există
+        await conn.execute("""
+            ALTER TABLE personal_lists
+            ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 2 NOT NULL
+        """)
+        await conn.execute("""
+            ALTER TABLE group_lists
+            ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 2 NOT NULL
+        """)
     logger.info("Tabele PostgreSQL create/verificate cu succes.")

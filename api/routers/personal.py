@@ -24,6 +24,7 @@ def _item_to_dict(row) -> dict:
         "user_id":    row["user_id"],
         "item":       row["item"],
         "quantity":   row["quantity"],
+        "priority":   row.get("priority", 2) if hasattr(row, "get") else (row["priority"] if "priority" in row.keys() else 2),
         "checked":    bool(row["checked"]),
         "created_at": str(row["created_at"]) if row["created_at"] else None,
     }
@@ -57,13 +58,14 @@ async def add_personal_item(
     if len(text) > 200:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Produsul e prea lung (max 200 caractere)")
 
-    # Dacă quantity nu e specificat explicit, încearcă să-l parseze din text
+    priority = max(1, min(3, body.priority))
+
     if body.quantity == "1":
         item_name, qty = parse_item_input(text)
     else:
         item_name, qty = text, body.quantity
 
-    item_id = await db_personal.add_item(user_id, item_name, qty)
+    item_id = await db_personal.add_item(user_id, item_name, qty, priority)
     row = await db_personal.get_item(item_id, user_id)
     return _item_to_dict(row)
 
@@ -101,7 +103,7 @@ async def delete_personal_item(
 
 
 # ---------------------------------------------------------------------------
-# DELETE /api/personal/clear
+# DELETE /api/personal/clear/checked
 # ---------------------------------------------------------------------------
 
 @router.delete("/clear/checked", response_model=CountResponse, summary="Șterge toate produsele bifate")

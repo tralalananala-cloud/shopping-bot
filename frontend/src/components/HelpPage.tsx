@@ -66,8 +66,8 @@ export default function HelpPage() {
     const tg = window.Telegram?.WebApp
     if (tg) {
       tg.BackButton.show()
-      tg.BackButton.onClick(() => setView({ type: 'home' }))
-      return () => { tg.BackButton.hide(); tg.BackButton.offClick(() => setView({ type: 'home' })) }
+      tg.BackButton.onClick(() => setView({ type: 'feed' }))
+      return () => { tg.BackButton.hide(); tg.BackButton.offClick(() => setView({ type: 'feed' })) }
     }
   }, [setView])
 
@@ -81,7 +81,7 @@ export default function HelpPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">ℹ️ Ajutor</h1>
           <button
-            onClick={() => setView({ type: 'home' })}
+            onClick={() => setView({ type: 'feed' })}
             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
             style={{ background: 'hsl(0 0% 100% / 0.06)' }}
           >

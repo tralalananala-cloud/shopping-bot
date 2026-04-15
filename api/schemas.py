@@ -2,7 +2,7 @@
 Modele Pydantic pentru request/response API.
 """
 
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel
 
 
@@ -24,6 +24,7 @@ class UserOut(BaseModel):
 class PersonalItemCreate(BaseModel):
     item: str
     quantity: str = "1"
+    priority: int = 2  # 1=mică, 2=normală, 3=mare
 
 
 class PersonalItemOut(BaseModel):
@@ -31,6 +32,7 @@ class PersonalItemOut(BaseModel):
     user_id: int
     item: str
     quantity: str
+    priority: int = 2
     checked: bool
     created_at: Optional[str] = None
 
@@ -77,6 +79,7 @@ class GroupsListOut(BaseModel):
 class GroupItemCreate(BaseModel):
     item: str
     quantity: str = "1"
+    priority: int = 2  # 1=mică, 2=normală, 3=mare
 
 
 class GroupItemOut(BaseModel):
@@ -84,6 +87,7 @@ class GroupItemOut(BaseModel):
     group_id: int
     item: str
     quantity: str
+    priority: int = 2
     checked: bool
     added_by: int
     added_by_name: Optional[str] = None
@@ -112,6 +116,23 @@ class MemberOut(BaseModel):
 class MembersListOut(BaseModel):
     group_id: int
     members: List[MemberOut]
+
+
+# ---------------------------------------------------------------------------
+# Feed
+# ---------------------------------------------------------------------------
+
+class FeedItemOut(BaseModel):
+    source: Literal["personal", "group"]
+    group_id: Optional[int] = None
+    group_name: Optional[str] = None
+    added_by_name: str
+    id: int
+    item: str
+    quantity: str
+    priority: int = 2
+    checked: bool
+    created_at: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------

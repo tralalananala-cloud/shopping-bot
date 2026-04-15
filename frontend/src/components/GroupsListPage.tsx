@@ -36,7 +36,7 @@ export default function GroupsListPage() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp
     if (!tg) return
-    const goHome = () => setView({ type: 'home' })
+    const goHome = () => setView({ type: 'feed' })
     tg.BackButton.show()
     tg.BackButton.onClick(goHome)
     return () => { tg.BackButton.hide(); tg.BackButton.offClick(goHome) }
@@ -102,7 +102,7 @@ export default function GroupsListPage() {
               <Plus size={16} />
             </button>
             <button
-              onClick={() => setView({ type: 'home' })}
+              onClick={() => setView({ type: 'feed' })}
               className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
               style={{ background: 'hsl(0 0% 100% / 0.06)' }}
             >

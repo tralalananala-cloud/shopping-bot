@@ -5,7 +5,15 @@ import {
   Users, Settings, LogOut, Sparkles, X, ChevronDown,
 } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
+import { PriorityPicker } from './PriorityPicker'
 import { toast } from 'sonner'
+import type { Priority } from '../api'
+
+const PRIORITY_COLOR: Record<number, string> = {
+  3: 'hsl(0 84% 60%)',
+  2: 'hsl(185 100% 50%)',
+  1: 'hsl(240 5% 50%)',
+}
 
 interface Props {
   groupId: number
@@ -47,7 +55,8 @@ export default function GroupDetailPage({ groupId }: Props) {
 
   const [showSheet, setShowSheet] = useState(false)
   const [itemInput, setItemInput] = useState('')
-  const [qtyInput, setQtyInput] = useState('')
+  const [qtyInput,  setQtyInput]  = useState('')
+  const [priority,  setPriority]  = useState<Priority>(2)
   const [adding, setAdding] = useState(false)
 
   const [showMembers, setShowMembers] = useState(false)
@@ -82,13 +91,17 @@ export default function GroupDetailPage({ groupId }: Props) {
   }
 
   async function handleAdd() {
-    const item = itemInput.trim()
-    if (!item) return
+    const raw = itemInput.trim()
+    if (!raw) return
+    const names = raw.split(',').map((s) => s.trim()).filter(Boolean)
     setAdding(true)
     try {
-      await addGroupItemAction(groupId, item, qtyInput.trim() || '1')
+      for (const name of names) {
+        await addGroupItemAction(groupId, name, names.length > 1 ? '1' : (qtyInput.trim() || '1'), priority)
+      }
       setItemInput('')
       setQtyInput('')
+      setPriority(2)
       setShowSheet(false)
     } finally {
       setAdding(false)
@@ -226,20 +239,23 @@ export default function GroupDetailPage({ groupId }: Props) {
         ) : (
           <motion.ul variants={listVariants} initial="hidden" animate="visible" className="flex flex-col gap-2">
             <AnimatePresence mode="popLayout">
-              {items.map((item) => (
+              {items.map((item) => {
+                const color = PRIORITY_COLOR[item.priority] ?? PRIORITY_COLOR[2]
+                return (
                 <motion.li
                   key={item.id}
                   variants={rowVariants}
                   exit="exit"
                   layout
-                  className="glass-card group flex items-center gap-3 rounded-2xl p-4"
+                  className="glass-card group flex items-center gap-3 overflow-hidden rounded-2xl p-4"
+                  style={{ borderLeft: `3px solid ${color}` }}
                 >
                   <button
                     onClick={() => toggleGroupItemAction(groupId, item.id)}
                     className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200"
                     style={{
-                      borderColor: item.checked ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                      background: item.checked ? 'hsl(var(--primary))' : 'transparent',
+                      borderColor: item.checked ? color : 'hsl(var(--border))',
+                      background:  item.checked ? color : 'transparent',
                     }}
                   >
                     {item.checked && <Check size={12} className="text-background" strokeWidth={3} />}
@@ -270,7 +286,8 @@ export default function GroupDetailPage({ groupId }: Props) {
                     <Trash2 size={13} />
                   </button>
                 </motion.li>
-              ))}
+                )
+              })}
             </AnimatePresence>
           </motion.ul>
         )}
@@ -476,23 +493,33 @@ export default function GroupDetailPage({ groupId }: Props) {
                 </button>
               </div>
               <div className="flex flex-col gap-3">
-                <input
-                  autoFocus
-                  placeholder="Nume produs"
-                  value={itemInput}
-                  onChange={(e) => setItemInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                  className="w-full rounded-xl border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
-                  style={{ background: 'hsl(0 0% 100% / 0.05)', borderColor: 'hsl(var(--border))' }}
-                />
-                <input
-                  placeholder="Cantitate (opțional)"
-                  value={qtyInput}
-                  onChange={(e) => setQtyInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                  className="w-full rounded-xl border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
-                  style={{ background: 'hsl(0 0% 100% / 0.05)', borderColor: 'hsl(var(--border))' }}
-                />
+                <div>
+                  <input
+                    autoFocus
+                    placeholder="Produs (sau mai multe: piine, lapte, sare)"
+                    value={itemInput}
+                    onChange={(e) => setItemInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                    className="w-full rounded-xl border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
+                    style={{ background: 'hsl(0 0% 100% / 0.05)', borderColor: 'hsl(var(--border))' }}
+                  />
+                  {itemInput.includes(',') && (
+                    <p className="mt-1 text-xs text-primary">
+                      ✓ {itemInput.split(',').filter(s => s.trim()).length} produse vor fi adăugate
+                    </p>
+                  )}
+                </div>
+                {!itemInput.includes(',') && (
+                  <input
+                    placeholder="Cantitate (opțional)"
+                    value={qtyInput}
+                    onChange={(e) => setQtyInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                    className="w-full rounded-xl border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground"
+                    style={{ background: 'hsl(0 0% 100% / 0.05)', borderColor: 'hsl(var(--border))' }}
+                  />
+                )}
+                <PriorityPicker value={priority} onChange={setPriority} />
                 <button
                   onClick={handleAdd}
                   disabled={!itemInput.trim() || adding}
